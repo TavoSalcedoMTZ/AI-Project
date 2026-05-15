@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "InputMappingContext.h"
 #include "Logging/LogMacros.h"
 #include "AIProjectCharacter.generated.h"
 
@@ -49,10 +50,17 @@ protected:
 	UPROPERTY(EditAnywhere, Category="Input")
 	UInputAction* MouseLookAction;
 
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* ShootAction;
+
 public:
 
 	/** Constructor */
-	AAIProjectCharacter();	
+	AAIProjectCharacter();
+	void BeginPlay();
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputMappingContext* DefaultMappingContext;
 
 protected:
 
@@ -84,6 +92,11 @@ public:
 	/** Handles jump pressed inputs from either controls or UI interfaces */
 	UFUNCTION(BlueprintCallable, Category="Input")
 	virtual void DoJumpEnd();
+
+
+
+	UFUNCTION(BlueprintCallable, Category = "Input")
+	virtual void DoShoot();
 
 public:
 
