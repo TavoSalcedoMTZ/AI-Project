@@ -29,4 +29,7 @@ public:
 
     UPROPERTY(BlueprintReadOnly, Category = "Spawning")
     TMap<int32, APlayerController*> PlayerControllers;
+
+private:
+    bool bPlayersSpawned = false;
 };
