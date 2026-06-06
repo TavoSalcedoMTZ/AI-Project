@@ -4,7 +4,8 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "LevelManager.generated.h"
 
-// Equivalente a [Serializable] en Unity
+class UUpgradeItem; 
+
 USTRUCT(BlueprintType)
 struct FRoundData
 {
@@ -17,28 +18,37 @@ struct FRoundData
 	float SpawnRate = 2.0f;
 };
 
-/**
- * Level Manager para controlar Rondas y Enemigos
- */
 UCLASS()
 class AIPROJECT_API ULevelManager : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 
 public:
-	// Inicia el sistema de la ronda actual
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Level Manager|Economy")
+	int32 SharedMoney = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Manager|Shop")
+	TArray<TSubclassOf<UUpgradeItem>> ShopUpgradesClasses;
+
+
+	UPROPERTY(BlueprintReadOnly, Category = "Level Manager|Shop")
+	TArray<UUpgradeItem*> InstancedShopUpgrades;
+
+	UFUNCTION(BlueprintCallable, Category = "Level Manager|Shop")
+	void InitializeShop();
+
+	UFUNCTION(BlueprintCallable, Category = "Level Manager|Shop")
+	bool TryPurchaseUpgrade(UUpgradeItem* UpgradeToBuy);
+
 	UFUNCTION(BlueprintCallable, Category = "Level Manager")
 	void StartRound(int32 RoundNumber);
 
-	// Se llama cuando un enemigo muere para dar dinero
 	UFUNCTION(BlueprintCallable, Category = "Level Manager")
 	void OnEnemyKilled(int32 PlayerID, int32 MoneyReward);
 
-	// Función que intentará spawnear un enemigo según el ratio
 	UFUNCTION()
 	void SpawnEnemyRoutine();
 
-	// Configuración de rondas (Puedes llenarlo desde Blueprints)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Manager|Data")
 	TArray<FRoundData> RoundsConfig;
 
@@ -49,10 +59,5 @@ private:
 	int32 CurrentRoundIndex = 0;
 	int32 EnemiesSpawnedThisRound = 0;
 	int32 EnemiesAlive = 0;
-
-	// Variables para rastrear el dinero de los jugadores (0 = Jugador 1, 1 = Jugador 2)
-	int32 Player1Money = 0;
-	int32 Player2Money = 0;
-
 	FTimerHandle SpawnTimerHandle;
 };
