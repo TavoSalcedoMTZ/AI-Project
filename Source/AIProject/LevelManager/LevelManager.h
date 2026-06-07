@@ -4,7 +4,8 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "LevelManager.generated.h"
 
-class UUpgradeItem; 
+class UUpgradeItem;
+class UUserWidget; // Forward declaration para no sobrecargar el header
 
 USTRUCT(BlueprintType)
 struct FRoundData
@@ -31,10 +32,14 @@ public:
 	TArray<TSubclassOf<UUpgradeItem>> ShopUpgradesClasses;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Manager|Enemies")
-	TSubclassOf<AActor> NormalEnemyClass; 
+	TSubclassOf<AActor> NormalEnemyClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Manager|Enemies")
 	TSubclassOf<AActor> SpecialEnemyClass;
+
+	// === NUEVO: Variable para asignar tu Widget BPW_Shop ===
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Manager|UI")
+	TSubclassOf<UUserWidget> ShopWidgetClass;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Level Manager|Shop")
 	TArray<UUpgradeItem*> InstancedShopUpgrades;
@@ -54,6 +59,13 @@ public:
 	UFUNCTION()
 	void SpawnEnemyRoutine();
 
+	// === NUEVAS FUNCIONES PARA CONTROL DE TIENDA ENTRE RONDAS ===
+	UFUNCTION(BlueprintCallable, Category = "Level Manager")
+	void OnRoundFinalized();
+
+	UFUNCTION()
+	void AdvanceToNextRound();
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Manager|Data")
 	TArray<FRoundData> RoundsConfig;
 
@@ -64,5 +76,12 @@ private:
 	int32 CurrentRoundIndex = 0;
 	int32 EnemiesSpawnedThisRound = 0;
 	int32 EnemiesAlive = 0;
+
 	FTimerHandle SpawnTimerHandle;
+
+	// === NUEVAS VARIABLES PRIVADAS ===
+	FTimerHandle ShopPhaseTimerHandle;
+
+	UPROPERTY()
+	UUserWidget* CurrentShopWidget = nullptr; // Guarda el widget vivo para poder quitarlo después
 };
