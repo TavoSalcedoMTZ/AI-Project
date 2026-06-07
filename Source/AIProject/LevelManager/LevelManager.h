@@ -30,6 +30,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Manager|Shop")
 	TArray<TSubclassOf<UUpgradeItem>> ShopUpgradesClasses;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Manager|Enemies")
+	TSubclassOf<AActor> NormalEnemyClass; 
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Manager|Enemies")
+	TSubclassOf<AActor> SpecialEnemyClass;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Level Manager|Shop")
 	TArray<UUpgradeItem*> InstancedShopUpgrades;

@@ -90,13 +90,26 @@ void ULevelManager::SpawnEnemyRoutine()
 		}
 	}
 
+	FVector SpawnLocation = FVector(0.0f, 0.0f, 100.0f);
+	FRotator SpawnRotation = FRotator::ZeroRotator;
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
 	if (bSpawnSpecial)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Spawneando Enemigo ESPECIAL"));
+		if (SpecialEnemyClass)
+		{
+			GetWorld()->SpawnActor<AActor>(SpecialEnemyClass, SpawnLocation, SpawnRotation, SpawnParams);
+			// UE_LOG(LogTemp, Warning, TEXT("Spawneando Enemigo ESPECIAL"));
+		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Spawneando Enemigo NORMAL"));
+		if (NormalEnemyClass)
+		{
+			GetWorld()->SpawnActor<AActor>(NormalEnemyClass, SpawnLocation, SpawnRotation, SpawnParams);
+			// UE_LOG(LogTemp, Warning, TEXT("Spawneando Enemigo NORMAL"));
+		}
 	}
 
 	EnemiesSpawnedThisRound++;
