@@ -69,6 +69,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Manager|Data")
 	TArray<FRoundData> RoundsConfig;
 
+	// === NUEVO: Control de área de Spawn ===
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Manager|Spawn")
+	FVector SpawnCenter = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Manager|Spawn")
+	float SpawnRadius = 2000.0f;
+
+	// Función para llamar desde el Blueprint del Nivel al iniciar BeginPlay
+	UFUNCTION(BlueprintCallable, Category = "Level Manager|Spawn")
+	void SetSpawnArea(FVector NewCenter, float NewRadius);
+
 protected:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 

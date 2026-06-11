@@ -3,7 +3,8 @@
 #include "TimerManager.h"
 #include "Math/UnrealMathUtility.h"
 #include "UpgradeItem.h" 
-#include "Blueprint/UserWidget.h" // !!! INDISPENSABLE PARA CREAR WIDGETS DESDE C++
+#include "Blueprint/UserWidget.h" 
+#include "NavigationSystem.h" 
 
 void ULevelManager::InitializeShop()
 {
@@ -85,7 +86,23 @@ void ULevelManager::SpawnEnemyRoutine()
 		}
 	}
 
-	FVector SpawnLocation = FVector(0.0f, 0.0f, 100.0f);
+	FVector SpawnLocation = SpawnCenter; 
+	UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetCurrent(GetWorld());
+
+	if (NavSystem)
+	{
+		FNavLocation RandomNavLocation;
+		if (NavSystem->GetRandomPointInNavigableRadius(SpawnCenter, SpawnRadius, RandomNavLocation))
+		{
+			SpawnLocation = RandomNavLocation.Location;
+			SpawnLocation.Z += 50.0f;
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("LevelManager: No se encontró un punto en el NavMesh. Generando en el centro."));
+		}
+	}
+
 	FRotator SpawnRotation = FRotator::ZeroRotator;
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
@@ -174,4 +191,10 @@ void ULevelManager::AdvanceToNextRound()
 
 	// 3. Comenzamos de nuevo el proceso
 	StartRound(NextRoundNumber);
+}
+
+void ULevelManager::SetSpawnArea(FVector NewCenter, float NewRadius)
+{
+	SpawnCenter = NewCenter;
+	SpawnRadius = NewRadius;
 }
