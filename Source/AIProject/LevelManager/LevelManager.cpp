@@ -166,7 +166,7 @@ void ULevelManager::OnRoundFinalized()
 
 	// 2. Iniciar el contador de 30 segundos para quitar la tienda y arrancar la siguiente ronda
 	// El parámetro 'false' al final indica que NO es un timer en bucle (se ejecuta una sola vez)
-	World->GetTimerManager().SetTimer(ShopPhaseTimerHandle, this, &ULevelManager::AdvanceToNextRound, 30.0f, false);
+	World->GetTimerManager().SetTimer(ShopPhaseTimerHandle, this, &ULevelManager::AdvanceToNextRound, 10.0f, false);
 }
 
 void ULevelManager::AdvanceToNextRound()
