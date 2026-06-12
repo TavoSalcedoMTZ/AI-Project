@@ -159,8 +159,8 @@ void ULevelManager::OnRoundFinalized()
 			CurrentShopWidget->AddToViewport();
 
 			// Opcional: Podrías activar el mouse aquí si tu tienda requiere clics directos
-			// APlayerController* PC = World->GetFirstPlayerController();
-			// if(PC) { PC->SetShowMouseCursor(true); PC->SetInputMode(FInputModeGameAndUI()); }
+			APlayerController* PC = World->GetFirstPlayerController();
+			if(PC) { PC->SetShowMouseCursor(true); PC->SetInputMode(FInputModeGameAndUI()); }
 		}
 	}
 
@@ -178,10 +178,10 @@ void ULevelManager::AdvanceToNextRound()
 		CurrentShopWidget = nullptr; // Limpiamos la referencia
 
 		// Opcional: Si activaste el mouse, aquí lo desactivas
-		// if (UWorld* World = GetWorld()) {
-		//     APlayerController* PC = World->GetFirstPlayerController();
-		//     if(PC) { PC->SetShowMouseCursor(false); PC->SetInputMode(FInputModeGameOnly()); }
-		// }
+		if (UWorld* World = GetWorld()) {
+		     APlayerController* PC = World->GetFirstPlayerController();
+		     if(PC) { PC->SetShowMouseCursor(false); PC->SetInputMode(FInputModeGameOnly()); }
+		}
 	}
 
 	// 2. Calculamos el siguiente número de ronda (CurrentRoundIndex es index 0, así que sumamos 2 para la siguiente ronda)
