@@ -157,7 +157,7 @@ void ULevelManager::OnEnemyKilled(int32 PlayerID, int32 MoneyReward, FVector Dea
 					if (RootPrim && RootPrim->IsSimulatingPhysics())
 					{
 						// Creamos un vector de impulso: Direcciones aleatorias en X/Y, y siempre hacia arriba en Z
-						FVector Impulse = FVector(FMath::RandRange(-300.f, 300.f), FMath::RandRange(-300.f, 300.f), FMath::RandRange(400.f, 800.f));
+						FVector Impulse = FVector(FMath::RandRange(-300.f, 300.f), FMath::RandRange(-300.f, 300.f), FMath::RandRange(120.f, 150.f));
 
 						// Aplicamos el impulso (bVelChange en true ignora la masa de la moneda)
 						RootPrim->AddImpulse(Impulse, NAME_None, true);
@@ -170,7 +170,7 @@ void ULevelManager::OnEnemyKilled(int32 PlayerID, int32 MoneyReward, FVector Dea
 		if (PotionClass)
 		{
 			int32 DropChance = FMath::RandRange(1, 100);
-			if (DropChance <= 33) // 33% de probabilidad
+			if (DropChance <= 44) // 44% de probabilidad
 			{
 				AActor* SpawnedPotion = World->SpawnActor<AActor>(PotionClass, DeathLocation, FRotator::ZeroRotator, SpawnParams);
 				if (SpawnedPotion)
@@ -178,7 +178,7 @@ void ULevelManager::OnEnemyKilled(int32 PlayerID, int32 MoneyReward, FVector Dea
 					UPrimitiveComponent* RootPrim = Cast<UPrimitiveComponent>(SpawnedPotion->GetRootComponent());
 					if (RootPrim && RootPrim->IsSimulatingPhysics())
 					{
-						FVector Impulse = FVector(FMath::RandRange(-200.f, 200.f), FMath::RandRange(-200.f, 200.f), FMath::RandRange(500.f, 700.f));
+						FVector Impulse = FVector(FMath::RandRange(-200.f, 200.f), FMath::RandRange(-200.f, 200.f), FMath::RandRange(100.f, 150.f));
 						RootPrim->AddImpulse(Impulse, NAME_None, true);
 					}
 				}
