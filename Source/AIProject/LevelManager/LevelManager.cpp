@@ -126,19 +126,70 @@ void ULevelManager::SpawnEnemyRoutine()
 	EnemiesAlive++;
 }
 
-void ULevelManager::OnEnemyKilled(int32 PlayerID, int32 MoneyReward)
+void ULevelManager::OnEnemyKilled(int32 PlayerID, int32 MoneyReward, FVector DeathLocation)
 {
 	EnemiesAlive--;
-	SharedMoney += MoneyReward;
 
-	UE_LOG(LogTemp, Warning, TEXT("El Jugador %d eliminó a un enemigo. Dinero global: %d"), PlayerID, SharedMoney);
+	// ELIMINADO: SharedMoney += MoneyReward; (Ahora lo manejarán los Blueprints de las monedas)
+	UE_LOG(LogTemp, Warning, TEXT("El Jugador %d eliminó a un enemigo. Quedan vivos: %d"), PlayerID, EnemiesAlive);
+
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+		// --- LÓGICA DE FUENTE DE MONEDAS ---
+		if (CoinClass)
+		{
+			// Cuántas monedas soltará (ej. de 3 a 5 para el efecto visual)
+			int32 CoinsToSpawn = FMath::RandRange(3, 10);
+
+			for (int32 i = 0; i < CoinsToSpawn; i++)
+			{
+				// Aparecemos la moneda
+				AActor* SpawnedCoin = World->SpawnActor<AActor>(CoinClass, DeathLocation, FRotator::ZeroRotator, SpawnParams);
+
+				if (SpawnedCoin)
+				{
+					// Tomamos el componente raíz y verificamos que tenga físicas activadas
+					UPrimitiveComponent* RootPrim = Cast<UPrimitiveComponent>(SpawnedCoin->GetRootComponent());
+					if (RootPrim && RootPrim->IsSimulatingPhysics())
+					{
+						// Creamos un vector de impulso: Direcciones aleatorias en X/Y, y siempre hacia arriba en Z
+						FVector Impulse = FVector(FMath::RandRange(-300.f, 300.f), FMath::RandRange(-300.f, 300.f), FMath::RandRange(400.f, 800.f));
+
+						// Aplicamos el impulso (bVelChange en true ignora la masa de la moneda)
+						RootPrim->AddImpulse(Impulse, NAME_None, true);
+					}
+				}
+			}
+		}
+
+		// --- LÓGICA DE DROPEO DE POCIÓN (33% DE PROBABILIDAD) ---
+		if (PotionClass)
+		{
+			int32 DropChance = FMath::RandRange(1, 100);
+			if (DropChance <= 33) // 33% de probabilidad
+			{
+				AActor* SpawnedPotion = World->SpawnActor<AActor>(PotionClass, DeathLocation, FRotator::ZeroRotator, SpawnParams);
+				if (SpawnedPotion)
+				{
+					UPrimitiveComponent* RootPrim = Cast<UPrimitiveComponent>(SpawnedPotion->GetRootComponent());
+					if (RootPrim && RootPrim->IsSimulatingPhysics())
+					{
+						FVector Impulse = FVector(FMath::RandRange(-200.f, 200.f), FMath::RandRange(-200.f, 200.f), FMath::RandRange(500.f, 700.f));
+						RootPrim->AddImpulse(Impulse, NAME_None, true);
+					}
+				}
+			}
+		}
+	}
 
 	// Condición: Si ya spawneamos todos los de la ronda Y ya no queda ninguno vivo
 	if (EnemiesSpawnedThisRound >= RoundsConfig[CurrentRoundIndex].TotalEnemies && EnemiesAlive <= 0)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("¡Ronda Completada!"));
-
-		// LLAMAMOS A NUESTRA NUEVA FUNCIÓN
 		OnRoundFinalized();
 	}
 }

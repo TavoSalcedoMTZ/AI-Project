@@ -41,6 +41,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Manager|UI")
 	TSubclassOf<UUserWidget> ShopWidgetClass;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Manager|Drops")
+	TSubclassOf<AActor> CoinClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Manager|Drops")
+	TSubclassOf<AActor> PotionClass;
+
 	UPROPERTY(BlueprintReadOnly, Category = "Level Manager|Shop")
 	TArray<UUpgradeItem*> InstancedShopUpgrades;
 
@@ -54,7 +60,7 @@ public:
 	void StartRound(int32 RoundNumber);
 
 	UFUNCTION(BlueprintCallable, Category = "Level Manager")
-	void OnEnemyKilled(int32 PlayerID, int32 MoneyReward);
+	void OnEnemyKilled(int32 PlayerID, int32 MoneyReward, FVector DeathLocation);
 
 	UFUNCTION()
 	void SpawnEnemyRoutine();
