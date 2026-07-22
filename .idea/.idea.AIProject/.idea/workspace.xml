@@ -12,9 +12,9 @@
   <component name="ChangeListManager">
     <list default="true" id="a09e0db5-3fc8-4b77-97f5-48638c590c96" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.AIProject/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.AIProject/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Config/DefaultEngine.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Config/DefaultEngine.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Armando/Map_MainMenu.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Armando/Map_MainMenu.umap" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/Armando/UI/WB_MainMenu.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Armando/UI/WB_MainMenu.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Octavio/WB_Player.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Octavio/WB_Player.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/ThirdPerson/Blueprints/BP_ThirdPersonGameMode.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/ThirdPerson/Blueprints/BP_ThirdPersonGameMode.uasset" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -60,7 +60,8 @@
       <updated>1782585308346</updated>
       <workItem from="1782585309954" duration="692000" />
       <workItem from="1782586053872" duration="3301000" />
-      <workItem from="1784394613971" duration="1415000" />
+      <workItem from="1784394613971" duration="2610000" />
+      <workItem from="1784653531385" duration="1300000" />
     </task>
     <servers />
   </component>
