@@ -5,7 +5,9 @@
 #include "LevelManager.generated.h"
 
 class UUpgradeItem;
-class UUserWidget; // Forward declaration para no sobrecargar el header
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnShopPhaseStarted);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnShopPhaseEnded);
 
 USTRUCT(BlueprintType)
 struct FRoundData
@@ -25,6 +27,12 @@ class AIPROJECT_API ULevelManager : public UGameInstanceSubsystem
 	GENERATED_BODY()
 
 public:
+	UPROPERTY(BlueprintAssignable, Category = "Level Manager|Events")
+	FOnShopPhaseStarted OnShopPhaseStartedEvent;
+
+	UPROPERTY(BlueprintAssignable, Category = "Level Manager|Events")
+	FOnShopPhaseEnded OnShopPhaseEndedEvent;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Level Manager|Economy")
 	int32 SharedMoney = 0;
 
@@ -36,10 +44,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Manager|Enemies")
 	TSubclassOf<AActor> SpecialEnemyClass;
-
-	// === NUEVO: Variable para asignar tu Widget BPW_Shop ===
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Manager|UI")
-	TSubclassOf<UUserWidget> ShopWidgetClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Manager|Drops")
 	TSubclassOf<AActor> CoinClass;
@@ -65,7 +69,6 @@ public:
 	UFUNCTION()
 	void SpawnEnemyRoutine();
 
-	// === NUEVAS FUNCIONES PARA CONTROL DE TIENDA ENTRE RONDAS ===
 	UFUNCTION(BlueprintCallable, Category = "Level Manager")
 	void OnRoundFinalized();
 
@@ -75,14 +78,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Manager|Data")
 	TArray<FRoundData> RoundsConfig;
 
-	// === NUEVO: Control de área de Spawn ===
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Manager|Spawn")
 	FVector SpawnCenter = FVector::ZeroVector;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Manager|Spawn")
 	float SpawnRadius = 2000.0f;
 
-	// Función para llamar desde el Blueprint del Nivel al iniciar BeginPlay
 	UFUNCTION(BlueprintCallable, Category = "Level Manager|Spawn")
 	void SetSpawnArea(FVector NewCenter, float NewRadius);
 
@@ -95,10 +96,5 @@ private:
 	int32 EnemiesAlive = 0;
 
 	FTimerHandle SpawnTimerHandle;
-
-	// === NUEVAS VARIABLES PRIVADAS ===
 	FTimerHandle ShopPhaseTimerHandle;
-
-	UPROPERTY()
-	UUserWidget* CurrentShopWidget = nullptr; // Guarda el widget vivo para poder quitarlo después
 };

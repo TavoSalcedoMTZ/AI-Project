@@ -3,7 +3,6 @@
 #include "TimerManager.h"
 #include "Math/UnrealMathUtility.h"
 #include "UpgradeItem.h" 
-#include "Blueprint/UserWidget.h" 
 #include "NavigationSystem.h" 
 
 void ULevelManager::InitializeShop()
@@ -31,6 +30,7 @@ bool ULevelManager::TryPurchaseUpgrade(UUpgradeItem* UpgradeToBuy)
 	{
 		SharedMoney -= UpgradeToBuy->Cost;
 		UpgradeToBuy->bIsPurchased = true;
+		UpgradeToBuy->PurchaseCount++;
 		UpgradeToBuy->OnUpgradePurchased();
 		return true;
 	}
@@ -86,7 +86,7 @@ void ULevelManager::SpawnEnemyRoutine()
 		}
 	}
 
-	FVector SpawnLocation = SpawnCenter; 
+	FVector SpawnLocation = SpawnCenter;
 	UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetCurrent(GetWorld());
 
 	if (NavSystem)
@@ -130,7 +130,6 @@ void ULevelManager::OnEnemyKilled(int32 PlayerID, int32 MoneyReward, FVector Dea
 {
 	EnemiesAlive--;
 
-	// ELIMINADO: SharedMoney += MoneyReward; (Ahora lo manejarán los Blueprints de las monedas)
 	UE_LOG(LogTemp, Warning, TEXT("El Jugador %d eliminó a un enemigo. Quedan vivos: %d"), PlayerID, EnemiesAlive);
 
 	UWorld* World = GetWorld();
@@ -142,24 +141,18 @@ void ULevelManager::OnEnemyKilled(int32 PlayerID, int32 MoneyReward, FVector Dea
 		// --- LÓGICA DE FUENTE DE MONEDAS ---
 		if (CoinClass)
 		{
-			// Cuántas monedas soltará (ej. de 3 a 5 para el efecto visual)
 			int32 CoinsToSpawn = FMath::RandRange(3, 10);
 
 			for (int32 i = 0; i < CoinsToSpawn; i++)
 			{
-				// Aparecemos la moneda
 				AActor* SpawnedCoin = World->SpawnActor<AActor>(CoinClass, DeathLocation, FRotator::ZeroRotator, SpawnParams);
 
 				if (SpawnedCoin)
 				{
-					// Tomamos el componente raíz y verificamos que tenga físicas activadas
 					UPrimitiveComponent* RootPrim = Cast<UPrimitiveComponent>(SpawnedCoin->GetRootComponent());
 					if (RootPrim && RootPrim->IsSimulatingPhysics())
 					{
-						// Creamos un vector de impulso: Direcciones aleatorias en X/Y, y siempre hacia arriba en Z
 						FVector Impulse = FVector(FMath::RandRange(-300.f, 300.f), FMath::RandRange(-300.f, 300.f), FMath::RandRange(120.f, 150.f));
-
-						// Aplicamos el impulso (bVelChange en true ignora la masa de la moneda)
 						RootPrim->AddImpulse(Impulse, NAME_None, true);
 					}
 				}
@@ -194,53 +187,29 @@ void ULevelManager::OnEnemyKilled(int32 PlayerID, int32 MoneyReward, FVector Dea
 	}
 }
 
-// LÓGICA DE TIENDA Y ESPERA AUTOMÁTICA
 void ULevelManager::OnRoundFinalized()
 {
 	UWorld* World = GetWorld();
 	if (!World) return;
 
-	// 1. Crear el Widget de la Tienda si asignamos la clase
-	if (ShopWidgetClass)
-	{
-		// Usamos el World para instanciar el Widget
-		CurrentShopWidget = CreateWidget<UUserWidget>(World, ShopWidgetClass);
-		if (CurrentShopWidget)
-		{
-			CurrentShopWidget->AddToViewport();
+	// === NUEVO: Disparamos el evento para que los Blueprints lo escuchen ===
+	OnShopPhaseStartedEvent.Broadcast();
 
-			// Opcional: Podrías activar el mouse aquí si tu tienda requiere clics directos
-			APlayerController* PC = World->GetFirstPlayerController();
-			if(PC) { PC->SetShowMouseCursor(true); PC->SetInputMode(FInputModeGameAndUI()); }
-		}
-	}
-
-	// 2. Iniciar el contador de 30 segundos para quitar la tienda y arrancar la siguiente ronda
-	// El parámetro 'false' al final indica que NO es un timer en bucle (se ejecuta una sola vez)
+	// Iniciar el contador de 10 segundos para arrancar la siguiente ronda
 	World->GetTimerManager().SetTimer(ShopPhaseTimerHandle, this, &ULevelManager::AdvanceToNextRound, 10.0f, false);
 }
 
 void ULevelManager::AdvanceToNextRound()
 {
-	// 1. Si el widget existe, lo removemos de la pantalla
-	if (CurrentShopWidget)
-	{
-		CurrentShopWidget->RemoveFromParent();
-		CurrentShopWidget = nullptr; // Limpiamos la referencia
+	// === NUEVO: Disparamos el evento de que terminó el tiempo de tienda ===
+	OnShopPhaseEndedEvent.Broadcast();
 
-		// Opcional: Si activaste el mouse, aquí lo desactivas
-		if (UWorld* World = GetWorld()) {
-		     APlayerController* PC = World->GetFirstPlayerController();
-		     if(PC) { PC->SetShowMouseCursor(false); PC->SetInputMode(FInputModeGameOnly()); }
-		}
-	}
-
-	// 2. Calculamos el siguiente número de ronda (CurrentRoundIndex es index 0, así que sumamos 2 para la siguiente ronda)
+	// Calculamos el siguiente número de ronda
 	int32 NextRoundNumber = CurrentRoundIndex + 2;
 
 	UE_LOG(LogTemp, Warning, TEXT("Iniciando la Ronda %d..."), NextRoundNumber);
 
-	// 3. Comenzamos de nuevo el proceso
+	// Comenzamos de nuevo el proceso
 	StartRound(NextRoundNumber);
 }
 
