@@ -9,18 +9,6 @@ class UUpgradeItem;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnShopPhaseStarted);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnShopPhaseEnded);
 
-USTRUCT(BlueprintType)
-struct FRoundData
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Round Settings")
-	int32 TotalEnemies = 10;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Round Settings")
-	float SpawnRate = 2.0f;
-};
-
 UCLASS()
 class AIPROJECT_API ULevelManager : public UGameInstanceSubsystem
 {
@@ -54,6 +42,31 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Level Manager|Shop")
 	TArray<UUpgradeItem*> InstancedShopUpgrades;
 
+	// --- NUEVAS VARIABLES DE CONFIGURACIÓN DE RONDAS ---
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Manager|Data")
+	int32 TotalRounds = 10;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Manager|Data")
+	int32 BaseEnemies = 10;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Manager|Data")
+	float BaseSpawnRate = 2.0f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Level Manager|State")
+	int32 CurrentRoundTotalEnemies = 0;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Level Manager|State")
+	float CurrentRoundSpawnRate = 0.0f;
+
+	// ---------------------------------------------------
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Manager|Spawn")
+	FVector SpawnCenter = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Manager|Spawn")
+	float SpawnRadius = 2000.0f;
+
 	UFUNCTION(BlueprintCallable, Category = "Level Manager|Shop")
 	void InitializeShop();
 
@@ -74,15 +87,6 @@ public:
 
 	UFUNCTION()
 	void AdvanceToNextRound();
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Manager|Data")
-	TArray<FRoundData> RoundsConfig;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Manager|Spawn")
-	FVector SpawnCenter = FVector::ZeroVector;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Manager|Spawn")
-	float SpawnRadius = 2000.0f;
 
 	UFUNCTION(BlueprintCallable, Category = "Level Manager|Spawn")
 	void SetSpawnArea(FVector NewCenter, float NewRadius);

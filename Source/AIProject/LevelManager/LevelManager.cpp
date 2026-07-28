@@ -1,4 +1,4 @@
-#include "LevelManager/LevelManager.h"
+#include "LevelManager.h" // Asegúrate de que coincida con el nombre de tu archivo
 #include "Engine/World.h"
 #include "TimerManager.h"
 #include "Math/UnrealMathUtility.h"
@@ -44,28 +44,35 @@ void ULevelManager::Initialize(FSubsystemCollectionBase& Collection)
 
 void ULevelManager::StartRound(int32 RoundNumber)
 {
-	CurrentRoundIndex = RoundNumber - 1;
+	if (RoundNumber > TotalRounds)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("LevelManager: ¡Se completaron todas las rondas configuradas!"));
+		return;
+	}
+
+	CurrentRoundIndex = RoundNumber - 1; // Ronda 1 = Index 0
 	EnemiesSpawnedThisRound = 0;
 	EnemiesAlive = 0; // Reset por seguridad
 
-	if (RoundsConfig.IsValidIndex(CurrentRoundIndex))
-	{
-		float Rate = RoundsConfig[CurrentRoundIndex].SpawnRate;
+	// --- CÁLCULO DINÁMICO ---
+	// Enemigos = Base (10) + (Ronda * 5)
+	CurrentRoundTotalEnemies = BaseEnemies + (CurrentRoundIndex * 5);
 
-		if (UWorld* World = GetWorld())
-		{
-			World->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ULevelManager::SpawnEnemyRoutine, Rate, true);
-		}
+	// SpawnRate = Base (2.0) - (Ronda * 0.25), limitado a un mínimo de 0.5f usando FMath::Max
+	CurrentRoundSpawnRate = FMath::Max(0.5f, BaseSpawnRate - (CurrentRoundIndex * 0.25f));
+
+	UE_LOG(LogTemp, Warning, TEXT("LevelManager: Iniciando Ronda %d | Enemigos: %d | Frecuencia: %f"), RoundNumber, CurrentRoundTotalEnemies, CurrentRoundSpawnRate);
+
+	if (UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ULevelManager::SpawnEnemyRoutine, CurrentRoundSpawnRate, true);
 	}
 }
 
 void ULevelManager::SpawnEnemyRoutine()
 {
-	if (!RoundsConfig.IsValidIndex(CurrentRoundIndex)) return;
-
-	int32 MaxEnemies = RoundsConfig[CurrentRoundIndex].TotalEnemies;
-
-	if (EnemiesSpawnedThisRound >= MaxEnemies)
+	// Cambiamos la validación del Array por la nueva variable calculada
+	if (EnemiesSpawnedThisRound >= CurrentRoundTotalEnemies)
 	{
 		if (UWorld* World = GetWorld())
 		{
@@ -179,8 +186,8 @@ void ULevelManager::OnEnemyKilled(int32 PlayerID, int32 MoneyReward, FVector Dea
 		}
 	}
 
-	// Condición: Si ya spawneamos todos los de la ronda Y ya no queda ninguno vivo
-	if (EnemiesSpawnedThisRound >= RoundsConfig[CurrentRoundIndex].TotalEnemies && EnemiesAlive <= 0)
+	// Condición actualizada para usar CurrentRoundTotalEnemies
+	if (EnemiesSpawnedThisRound >= CurrentRoundTotalEnemies && EnemiesAlive <= 0)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("¡Ronda Completada!"));
 		OnRoundFinalized();
@@ -192,24 +199,19 @@ void ULevelManager::OnRoundFinalized()
 	UWorld* World = GetWorld();
 	if (!World) return;
 
-	// === NUEVO: Disparamos el evento para que los Blueprints lo escuchen ===
 	OnShopPhaseStartedEvent.Broadcast();
 
-	// Iniciar el contador de 10 segundos para arrancar la siguiente ronda
 	World->GetTimerManager().SetTimer(ShopPhaseTimerHandle, this, &ULevelManager::AdvanceToNextRound, 10.0f, false);
 }
 
 void ULevelManager::AdvanceToNextRound()
 {
-	// === NUEVO: Disparamos el evento de que terminó el tiempo de tienda ===
 	OnShopPhaseEndedEvent.Broadcast();
 
-	// Calculamos el siguiente número de ronda
 	int32 NextRoundNumber = CurrentRoundIndex + 2;
 
 	UE_LOG(LogTemp, Warning, TEXT("Iniciando la Ronda %d..."), NextRoundNumber);
 
-	// Comenzamos de nuevo el proceso
 	StartRound(NextRoundNumber);
 }
 

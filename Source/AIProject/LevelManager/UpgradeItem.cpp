@@ -63,7 +63,7 @@ void UUpgradeItem::SpawnItemForPlayer(TSubclassOf<AActor> ItemClassToSpawn)
 		APawn* PlayerPawn = PC->GetPawn();
 		if (PlayerPawn)
 		{
-			FVector SpawnLocation = PlayerPawn->GetActorLocation() + FVector(0.f, 0.f, 150.f);
+			FVector SpawnLocation = PlayerPawn->GetActorLocation() + FVector(200.f, 0.f, 150.f);
 			FRotator SpawnRotation = FRotator::ZeroRotator;
 
 			FActorSpawnParameters SpawnParams;
